@@ -2,7 +2,7 @@
 set -eu
 
 cd "$(dirname "$0")/.."
-output_path=${1:-pkg}
+output_path=${1:-dist/package}
 stage=$(mktemp -d)
 trap 'rm -rf "$stage"' EXIT HUP INT TERM
 

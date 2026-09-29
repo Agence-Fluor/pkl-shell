@@ -13,7 +13,7 @@ amends "pkl:Project"
 
 dependencies {
   ["shell"] {
-    uri = "package://raw.githubusercontent.com/Agence-Fluor/pkl-shell/main/pkg/pkl-shell@0.1.0"
+    uri = "package://pkg.pkl-lang.org/github.com/Agence-Fluor/pkl-shell/pkl-shell@0.1.0"
   }
 }
 
@@ -45,7 +45,7 @@ pkl project resolve
 pkl eval example.pkl
 ```
 
-Le premier `shell.run` appelle [`install.pkl`](lib/install.pkl) : Pkl lit le binaire adapté à votre plateforme dans le package et l'écrit dans `.pkl-shell/0.1.0/reader`. Le bootstrap lui donne le droit d'exécution et le réutilise ensuite. Ajoutez `.pkl-shell/` à votre `.gitignore`. Le [package `0.1.0`](https://raw.githubusercontent.com/Agence-Fluor/pkl-shell/main/pkg/pkl-shell@0.1.0) sera accessible dès le premier push de ce dépôt sur `main`.
+Le premier `shell.run` appelle [`install.pkl`](lib/install.pkl) : Pkl lit le binaire adapté à votre plateforme dans le package et l'écrit dans `.pkl-shell/0.1.0/reader`. Le bootstrap lui donne le droit d'exécution et le réutilise ensuite. Ajoutez `.pkl-shell/` à votre `.gitignore`. Le package sera accessible après la publication de la [release `pkl-shell@0.1.0`](https://github.com/Agence-Fluor/pkl-shell/releases/tag/pkl-shell@0.1.0).
 
 ### Pourquoi un bootstrap ?
 
@@ -68,7 +68,7 @@ result = "hello"
 special = "é # ? % /"
 ```
 
-Le dossier [`test/`](test/) déclare seulement la dépendance locale ; l'option CLI enregistre le reader pour cette démo. La [CI](https://github.com/Agence-Fluor/pkl-shell/actions/workflows/build.yml) teste aussi le ZIP publié et son installation automatique via un miroir HTTP local.
+Le dossier [`test/`](test/) déclare seulement la dépendance locale ; l'option CLI enregistre le reader pour cette démo. La [CI](https://github.com/Agence-Fluor/pkl-shell/actions/workflows/build.yml) construit aussi le ZIP Pkl et teste son installation automatique via un miroir HTTP local.
 
 ## Plateformes
 
@@ -78,19 +78,19 @@ Le dossier [`test/`](test/) déclare seulement la dépendance locale ; l'option 
 | macOS | amd64, arm64 | `bin/pkl-shell-darwin-<arch>` |
 | FreeBSD | amd64, arm64 | `bin/pkl-shell-freebsd-<arch>` |
 
-Les six binaires sont compilés dans la CI ; le fonctionnement complet est testé sur Linux amd64. La [CI fournit aussi une archive](https://github.com/Agence-Fluor/pkl-shell/actions/workflows/build.yml) avec un lanceur `pkl-shell` qui choisit le binaire précompilé dans `dist/`. Le ZIP Pkl pèse environ 20 Mo car il contient les six plateformes.
+Les six binaires sont compilés dans la CI ; le fonctionnement complet est testé sur Linux amd64. La [CI fournit aussi une archive](https://github.com/Agence-Fluor/pkl-shell/actions/workflows/build.yml) avec un lanceur `pkl-shell` qui choisit le binaire précompilé dans `dist/`. Le ZIP Pkl pèse environ 20 Mo car il contient les six plateformes. Sur un tag `pkl-shell@<version>`, la CI publie le ZIP et ses métadonnées comme assets de la GitHub Release. L'URI `pkg.pkl-lang.org` redirige vers cette release.
 
 ## Versions et publication
 
 L'URI d'un [package Pkl exige une version SemVer](https://pkl-lang.org/main/latest/language-reference/index.html#package-asset-uri) : `@latest` n'est pas utilisable ici. Épinglez `@0.1.0`, puis mettez à jour explicitement l'URI et le chemin `.pkl-shell/<version>/reader` lors d'une nouvelle version.
 
-Pour publier une nouvelle version, modifiez `version` dans [`lib/PklProject`](lib/PklProject) et le chemin de sortie dans `install.pkl`, puis régénérez les artefacts :
+Pour publier une nouvelle version, modifiez `version` dans [`lib/PklProject`](lib/PklProject), le chemin de sortie dans `install.pkl`, ainsi que les exemples de version dans ce README et `scripts/test-package.sh`. Poussez le commit, puis son tag `pkl-shell@<version>`. Pour la première version :
 
 ```sh
-sh scripts/build-unix.sh
-sh scripts/package-pkl.sh
+git tag 'pkl-shell@0.1.0'
+git push github 'pkl-shell@0.1.0'
 ```
 
-Commitez les quatre fichiers de `pkg/` et poussez sur `main`. Gardez les anciennes versions : leurs URI et sommes de contrôle doivent rester stables. La CI vérifie que le ZIP correspond au code source et que l'installation depuis le package fonctionne.
+La CI construit le package dans `dist/package`, teste son installation et publie les quatre fichiers Pkl sur la release. Aucun ZIP n'est commité. Gardez chaque release de version intacte : les URI et sommes de contrôle doivent rester stables.
 
 `shell.run` encode la commande en base64 pour éviter l'encodage URI manuel. Pkl met en cache chaque URI pendant une évaluation : deux appels identiques peuvent partager le même résultat. Les commandes s'exécutent via `sh -c` avec les droits du processus Pkl ; utilisez seulement des commandes et des modules de confiance.

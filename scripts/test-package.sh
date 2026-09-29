@@ -2,6 +2,7 @@
 set -eu
 
 repo=$(CDPATH= cd "$(dirname "$0")/.." && pwd)
+package_dir=${1:-"$repo/dist/package"}
 temp=$(mktemp -d)
 server_pid=
 cleanup() {
@@ -13,7 +14,7 @@ cleanup() {
 trap cleanup EXIT HUP INT TERM
 
 go build -o "$temp/serve-package" "$repo/scripts/serve-package.go"
-"$temp/serve-package" "$repo/pkg" >"$temp/server.log" 2>&1 &
+"$temp/serve-package" "$package_dir" >"$temp/server.log" 2>&1 &
 server_pid=$!
 
 attempt=0
@@ -32,7 +33,7 @@ amends "pkl:Project"
 
 dependencies {
   ["shell"] {
-    uri = "package://raw.githubusercontent.com/Agence-Fluor/pkl-shell/main/pkg/pkl-shell@0.1.0"
+    uri = "package://pkg.pkl-lang.org/github.com/Agence-Fluor/pkl-shell/pkl-shell@0.1.0"
   }
 }
 
@@ -40,7 +41,8 @@ evaluatorSettings {
   moduleCacheDir = ".pkl-cache"
   http {
     rewrites {
-      ["https://raw.githubusercontent.com/Agence-Fluor/pkl-shell/main/pkg/"] = "http://127.0.0.1:8765/"
+      ["https://pkg.pkl-lang.org/github.com/Agence-Fluor/pkl-shell/"] = "http://127.0.0.1:8765/"
+      ["https://github.com/Agence-Fluor/pkl-shell/releases/download/pkl-shell@0.1.0/"] = "http://127.0.0.1:8765/"
     }
   }
   externalResourceReaders {

@@ -22,15 +22,41 @@ jobs:
         run: |
           nix --extra-experimental-features 'nix-command flakes' develop . --command go test ./...
           nix --extra-experimental-features 'nix-command flakes' develop . --command sh -c 'cd test && pkl project resolve && pkl eval --external-resource-reader=shell=../pkl-shell example.pkl'
-      - name: Verify published Pkl package artifacts
-        run: |
-          nix --extra-experimental-features 'nix-command flakes' develop . --command sh scripts/package-pkl.sh "$RUNNER_TEMP/pkl-shell-package"
-          diff -r pkg "$RUNNER_TEMP/pkl-shell-package"
+      - name: Build Pkl package
+        run: nix --extra-experimental-features 'nix-command flakes' develop . --command sh scripts/package-pkl.sh
       - name: Test the self-contained Pkl package
         run: nix --extra-experimental-features 'nix-command flakes' develop . --command sh scripts/test-package.sh
       - name: Bundle launcher, binaries, and Pkl package
-        run: tar -czf pkl-shell-unix.tar.gz pkl-shell dist lib/PklProject lib/shell.pkl lib/install.pkl pkg
+        run: tar -czf pkl-shell-unix.tar.gz pkl-shell dist lib/PklProject lib/shell.pkl lib/install.pkl
       - uses: actions/upload-artifact@v7
         with:
           path: pkl-shell-unix.tar.gz
           archive: false
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/pkl-shell@')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: cachix/install-nix-action@v31
+      - uses: actions/download-artifact@v8
+        with:
+          name: pkl-shell-unix.tar.gz
+      - name: Publish versioned package and Unix binaries
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          version=$(nix --extra-experimental-features 'nix-command flakes' develop . --command pkl eval --no-project -x 'package.version' lib/PklProject)
+          test "$TAG" = "pkl-shell@$version"
+          tar -xzf pkl-shell-unix.tar.gz
+          gh release create "$TAG" \
+            "dist/package/pkl-shell@$version" \
+            "dist/package/pkl-shell@$version.sha256" \
+            "dist/package/pkl-shell@$version.zip" \
+            "dist/package/pkl-shell@$version.zip.sha256" \
+            pkl-shell-unix.tar.gz \
+            --verify-tag --generate-notes
