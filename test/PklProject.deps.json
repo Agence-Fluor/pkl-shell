@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "resolvedDependencies": {
+    "package://raw.githubusercontent.com/Agence-Fluor/pkl-shell/main/pkg/pkl-shell@0": {
+      "type": "local",
+      "uri": "projectpackage://raw.githubusercontent.com/Agence-Fluor/pkl-shell/main/pkg/pkl-shell@0.1.0",
+      "path": "../lib"
+    }
+  }
+}

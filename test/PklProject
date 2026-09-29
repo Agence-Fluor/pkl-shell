@@ -1,0 +1,13 @@
+amends "pkl:Project"
+
+dependencies {
+  ["shell"] = import("../lib/PklProject")
+}
+
+evaluatorSettings {
+  externalResourceReaders {
+    ["shell"] {
+      executable = "../pkl-shell"
+    }
+  }
+}

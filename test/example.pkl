@@ -1,0 +1,4 @@
+import "@shell/shell.pkl"
+
+result = shell.run("printf hello")
+special = shell.run("printf '%s' 'é # ? % /'")
