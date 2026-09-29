@@ -1,0 +1,36 @@
+name: Build Unix readers
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: cachix/install-nix-action@v31
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build six Unix binaries through the flake
+        run: nix --extra-experimental-features 'nix-command flakes' develop . --command sh scripts/build-unix.sh
+      - name: Test Go reader and Pkl integration through the flake
+        run: |
+          nix --extra-experimental-features 'nix-command flakes' develop . --command go test ./...
+          nix --extra-experimental-features 'nix-command flakes' develop . --command sh -c 'cd test && pkl project resolve && pkl eval --external-resource-reader=shell=../pkl-shell example.pkl'
+      - name: Verify published Pkl package artifacts
+        run: |
+          nix --extra-experimental-features 'nix-command flakes' develop . --command sh scripts/package-pkl.sh "$RUNNER_TEMP/pkl-shell-package"
+          diff -r pkg "$RUNNER_TEMP/pkl-shell-package"
+      - name: Test the self-contained Pkl package
+        run: nix --extra-experimental-features 'nix-command flakes' develop . --command sh scripts/test-package.sh
+      - name: Bundle launcher, binaries, and Pkl package
+        run: tar -czf pkl-shell-unix.tar.gz pkl-shell dist lib/PklProject lib/shell.pkl lib/install.pkl pkg
+      - uses: actions/upload-artifact@v7
+        with:
+          path: pkl-shell-unix.tar.gz
+          archive: false

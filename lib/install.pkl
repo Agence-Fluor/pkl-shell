@@ -1,0 +1,16 @@
+amends "pkl:Command"
+
+import "pkl:platform"
+
+local const system = platform.current.operatingSystem.name
+local const os = if (system == "macOS") "darwin" else system.toLowerCase()
+local const processor = platform.current.processor.architecture
+local const arch = if (processor == "aarch64") "arm64" else if (processor == "x86_64") "amd64" else processor
+
+output {
+  files {
+    [".pkl-shell/0.1.0/reader"] {
+      bytes = read("bin/pkl-shell-\(os)-\(arch)").bytes
+    }
+  }
+}

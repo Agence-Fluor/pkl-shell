@@ -1,0 +1,1 @@
+function run(command: String): String = read("shell:b64:\(command.base64)").text

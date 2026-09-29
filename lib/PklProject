@@ -1,0 +1,9 @@
+amends "pkl:Project"
+
+package {
+  name = "pkl-shell"
+  baseUri = "package://raw.githubusercontent.com/Agence-Fluor/pkl-shell/main/pkg/pkl-shell"
+  version = "0.1.0"
+  packageZipUrl = "https://raw.githubusercontent.com/Agence-Fluor/pkl-shell/main/pkg/pkl-shell@\(version).zip"
+  sourceCode = "https://github.com/Agence-Fluor/pkl-shell"
+}

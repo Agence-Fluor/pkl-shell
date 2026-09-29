@@ -1,0 +1,29 @@
+#!/bin/sh
+set -eu
+
+case $0 in
+  */*) launcher=$0 ;;
+  *) launcher=$(command -v "$0") ;;
+esac
+script_dir=$(CDPATH= cd "$(dirname "$launcher")" && pwd)
+
+case $(uname -s) in
+  Linux) os=linux ;;
+  Darwin) os=darwin ;;
+  FreeBSD) os=freebsd ;;
+  *) echo "pkl-shell: unsupported operating system: $(uname -s)" >&2; exit 1 ;;
+esac
+
+case $(uname -m) in
+  x86_64|amd64) arch=amd64 ;;
+  aarch64|arm64) arch=arm64 ;;
+  *) echo "pkl-shell: unsupported architecture: $(uname -m)" >&2; exit 1 ;;
+esac
+
+reader="$script_dir/dist/pkl-shell-$os-$arch"
+if [ ! -x "$reader" ]; then
+  echo "pkl-shell: missing executable: $reader" >&2
+  exit 1
+fi
+
+exec "$reader" "$@"
