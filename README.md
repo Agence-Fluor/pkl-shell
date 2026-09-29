@@ -13,7 +13,7 @@ amends "pkl:Project"
 
 dependencies {
   ["shell"] {
-    uri = "package://pkg.pkl-lang.org/github.com/Agence-Fluor/pkl-shell/pkl-shell@0.1.0"
+    uri = "package://pkg.pkl-lang.org/github.com/Agence-Fluor/pkl-shell/pkl-shell@0.1.1"
   }
 }
 
@@ -23,7 +23,7 @@ evaluatorSettings {
       executable = "sh"
       arguments {
         "-ec"
-        "r=.pkl-shell/0.1.0/reader; test -x \"$r\" || pkl run @shell/install.pkl >/dev/null; chmod +x \"$r\"; exec \"$r\""
+        "r=.pkl-shell/0.1.1/reader; test -x \"$r\" || pkl run @shell/install.pkl >/dev/null; chmod +x \"$r\"; exec \"$r\""
       }
     }
   }
@@ -57,11 +57,20 @@ Au premier appel, le bootstrap extrait le binaire de la plateforme dans `.pkl-sh
 
 Pour essayer le dépôt avec Nix :
 
-Le shebang de `flake.pkl` utilise `pkl-nix-tools` sur le `PATH` et les
+Le shebang `#!/usr/bin/env -S pkl eval` de `flake.pkl` produit le rendu Nix.
+`pkl-nix-tools`, installé sur le `PATH`, lance les commandes Nix avec les
 versions Pkl verrouillées dans `PklProject.deps.json`.
 
 ```sh
-./flake.pkl develop --command sh -c 'sh scripts/build-unix.sh --host && cd test && pkl eval --external-resource-reader=shell=../pkl-shell example.pkl'
+pkl-nix-tools develop --command sh -c 'sh scripts/build-unix.sh --host && cd test && pkl eval --external-resource-reader=shell=../pkl-shell example.pkl'
 ```
 
-La CI compile les six binaires, construit et teste le package. Pour publier une version, mets à jour `version` dans [`lib/PklProject`](lib/PklProject) et le chemin dans [`lib/install.pkl`](lib/install.pkl), pousse le commit, puis crée le tag `pkl-shell@<version>`. La CI publie le package sur la [GitHub Release](https://github.com/Agence-Fluor/pkl-shell/releases) ; garde les releases existantes intactes.
+La CI compile les six binaires, construit et teste le package. Pour publier une version, mets à jour `version` dans [`lib/PklProject`](lib/PklProject) et le chemin dans [`lib/install.pkl`](lib/install.pkl), puis pousse le commit.
+
+```sh
+tag=$(sh scripts/release-tag.sh)
+git tag "$tag"
+git push github "$tag"
+```
+
+La CI vérifie le tag et publie le package sur la [GitHub Release](https://github.com/Agence-Fluor/pkl-shell/releases). Les releases existantes restent intactes.

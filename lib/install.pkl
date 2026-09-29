@@ -9,7 +9,7 @@ local const arch = if (processor == "aarch64") "arm64" else if (processor == "x8
 
 output {
   files {
-    [".pkl-shell/0.1.0/reader"] {
+    [".pkl-shell/0.1.1/reader"] {
       bytes = read("bin/pkl-shell-\(os)-\(arch)").bytes
     }
   }
