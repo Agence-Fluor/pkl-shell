@@ -16,16 +16,25 @@ jobs:
       - uses: cachix/install-nix-action@v31
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: pkl-community/setup-pkl@v0
+        with:
+          pkl-version: 0.31.1
+      - uses: actions/checkout@v7
+        with:
+          repository: Agence-Fluor/pkl-nix-tools
+          ref: pkl-nix-tools@0.1.0
+          path: .ci/pkl-nix-tools
+      - run: echo "$GITHUB_WORKSPACE/.ci/pkl-nix-tools" >> "$GITHUB_PATH"
       - name: Build six Unix binaries through the flake
-        run: nix --extra-experimental-features 'nix-command flakes' develop . --command sh scripts/build-unix.sh
+        run: ./flake.pkl develop --command sh scripts/build-unix.sh
       - name: Test Go reader and Pkl integration through the flake
         run: |
-          nix --extra-experimental-features 'nix-command flakes' develop . --command go test ./...
-          nix --extra-experimental-features 'nix-command flakes' develop . --command sh -c 'cd test && pkl project resolve && pkl eval --external-resource-reader=shell=../pkl-shell example.pkl'
+          ./flake.pkl develop --command go test ./...
+          ./flake.pkl develop --command sh -c 'cd test && pkl project resolve && pkl eval --external-resource-reader=shell=../pkl-shell example.pkl'
       - name: Build Pkl package
-        run: nix --extra-experimental-features 'nix-command flakes' develop . --command sh scripts/package-pkl.sh
+        run: ./flake.pkl develop --command sh scripts/package-pkl.sh
       - name: Test the self-contained Pkl package
-        run: nix --extra-experimental-features 'nix-command flakes' develop . --command sh scripts/test-package.sh
+        run: ./flake.pkl develop --command sh scripts/test-package.sh
       - name: Bundle launcher, binaries, and Pkl package
         run: tar -czf pkl-shell-unix.tar.gz pkl-shell dist lib/PklProject lib/shell.pkl lib/install.pkl
       - uses: actions/upload-artifact@v7
@@ -42,6 +51,15 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: cachix/install-nix-action@v31
+      - uses: pkl-community/setup-pkl@v0
+        with:
+          pkl-version: 0.31.1
+      - uses: actions/checkout@v7
+        with:
+          repository: Agence-Fluor/pkl-nix-tools
+          ref: pkl-nix-tools@0.1.0
+          path: .ci/pkl-nix-tools
+      - run: echo "$GITHUB_WORKSPACE/.ci/pkl-nix-tools" >> "$GITHUB_PATH"
       - uses: actions/download-artifact@v8
         with:
           name: pkl-shell-unix.tar.gz
@@ -50,7 +68,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.ref_name }}
         run: |
-          version=$(nix --extra-experimental-features 'nix-command flakes' develop . --command pkl eval --no-project -x 'package.version' lib/PklProject)
+          version=$(./flake.pkl develop --command pkl eval --no-project -x 'package.version' lib/PklProject)
           test "$TAG" = "pkl-shell@$version"
           tar -xzf pkl-shell-unix.tar.gz
           gh release create "$TAG" \

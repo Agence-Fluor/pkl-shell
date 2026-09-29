@@ -57,8 +57,11 @@ Au premier appel, le bootstrap extrait le binaire de la plateforme dans `.pkl-sh
 
 Pour essayer le dépôt avec Nix :
 
+Le shebang de `flake.pkl` utilise `pkl-nix-tools` sur le `PATH` et les
+versions Pkl verrouillées dans `PklProject.deps.json`.
+
 ```sh
-nix develop --command sh -c 'sh scripts/build-unix.sh --host && cd test && pkl eval --external-resource-reader=shell=../pkl-shell example.pkl'
+./flake.pkl develop --command sh -c 'sh scripts/build-unix.sh --host && cd test && pkl eval --external-resource-reader=shell=../pkl-shell example.pkl'
 ```
 
 La CI compile les six binaires, construit et teste le package. Pour publier une version, mets à jour `version` dans [`lib/PklProject`](lib/PklProject) et le chemin dans [`lib/install.pkl`](lib/install.pkl), pousse le commit, puis crée le tag `pkl-shell@<version>`. La CI publie le package sur la [GitHub Release](https://github.com/Agence-Fluor/pkl-shell/releases) ; garde les releases existantes intactes.
