@@ -1,4 +1,4 @@
 /dist/
 /pkg/
 /pkl-shell-unix.tar.gz
-/.pkl-shell/
+.pkl-shell/
