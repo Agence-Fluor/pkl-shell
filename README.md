@@ -55,16 +55,22 @@ Au premier appel, le bootstrap extrait le binaire de la plateforme dans `.pkl-sh
 
 ## Développement et versions
 
-Pour essayer le dépôt avec Nix :
-
-Le shebang de `flake.pkl` lance
+Pour essayer le dépôt, installez Bash 4+, Pkl 0.31.1+ et Nix avec Flakes.
+Le shebang de `flake.pkl` charge
 [`pkl-nix-tools`](https://github.com/Agence-Fluor/pkl-nix-tools#démarrer),
-chargé depuis la dépendance `nixTools` du projet, sans modifier `PATH`. Les versions Pkl sont verrouillées dans
-`PklProject.deps.json`. `pkl eval flake.pkl` affiche seulement le rendu Nix.
+depuis la dépendance `nixTools` du projet. Aucun lanceur global ni script
+Bash supplémentaire n'est nécessaire. Pkl démarre à chaque appel ; le rendu
+Nix reste en cache dans `.pkl-nix-tools/`. `pkl eval flake.pkl` affiche
+seulement le rendu Nix.
 
 ```sh
+pkl project resolve
 ./flake.pkl develop --command sh -c 'sh scripts/build-unix.sh --host && cd test && pkl eval --external-resource-reader=shell=../pkl-shell example.pkl'
 ```
+
+Commitez `PklProject.deps.json` après une modification des dépendances.
+L'installateur `@shell/install.pkl` reste nécessaire au lecteur `pkl-shell` ;
+il est appelé automatiquement par les réglages du `PklProject` ci-dessus.
 
 La CI compile les six binaires, construit et teste le package. Pour publier une version, mets à jour `version` dans [`lib/PklProject`](lib/PklProject) et le chemin dans [`lib/install.pkl`](lib/install.pkl), puis pousse le commit.
 
