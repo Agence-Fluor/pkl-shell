@@ -58,8 +58,8 @@ Au premier appel, le bootstrap extrait le binaire de la plateforme dans `.pkl-sh
 Pour essayer le dépôt avec Nix :
 
 Le shebang de `flake.pkl` lance
-[`pkl-nix-tools`](https://github.com/Agence-Fluor/pkl-nix-tools#installer-depuis-pkl),
-à installer dans `PATH`. Les versions Pkl sont verrouillées dans
+[`pkl-nix-tools`](https://github.com/Agence-Fluor/pkl-nix-tools#démarrer),
+chargé depuis la dépendance `nixTools` du projet, sans modifier `PATH`. Les versions Pkl sont verrouillées dans
 `PklProject.deps.json`. `pkl eval flake.pkl` affiche seulement le rendu Nix.
 
 ```sh

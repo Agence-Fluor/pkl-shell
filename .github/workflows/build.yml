@@ -24,12 +24,10 @@ jobs:
         env:
           TAG: ${{ github.ref_name }}
         run: sh scripts/release-tag.sh "$TAG"
-      - uses: actions/checkout@v7
-        with:
-          repository: Agence-Fluor/pkl-nix-tools
-          ref: pkl-nix-tools@0.1.5
-          path: .ci/pkl-nix-tools
-      - run: echo "$GITHUB_WORKSPACE/.ci/pkl-nix-tools" >> "$GITHUB_PATH"
+      - name: Resolve the project-local Pkl launcher
+        run: |
+          pkl project resolve
+          git diff --exit-code -- PklProject.deps.json
       - name: Build six Unix binaries through the flake
         run: ./flake.pkl develop --command sh scripts/build-unix.sh
       - name: Test Go reader and Pkl integration through the flake
